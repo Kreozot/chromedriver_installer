@@ -23,9 +23,9 @@ CHROMEDRIVER_URL_TEMPLATE = (
     '{architecture}.zip'
 )
 
-CHROMEDRIVER_VERSION_PATTERN = re.compile(r'^\d+\.\d+$')
+CHROMEDRIVER_VERSION_PATTERN = re.compile(r'^\d+\.\d+\.\d+\.\d+$')
 CROMEDRIVER_LATEST_VERSION_PATTERN = re.compile(
-    r'Latest-Release:-ChromeDriver-(\d+\.\d+)'
+    r'ChromeDriver (\d+\.\d+\.\d+\.\d+)'
 )
 
 # Global variables
@@ -54,8 +54,7 @@ class BuildScripts(build_scripts):
         plat = platform.platform().lower()
         if plat.startswith('darwin'):
             os_ = 'mac'
-            # Only 64 bit architecture is available for mac since version 2.23
-            architecture = 64 if float(chromedriver_version) >= 2.23 else 32
+            architecture = 64
         elif plat.startswith('linux'):
             os_ = 'linux'
             architecture = platform.architecture()[0][:-3]
