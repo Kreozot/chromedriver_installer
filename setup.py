@@ -1,5 +1,5 @@
 from distutils.command.install import install
-from distutils.command.build_scripts import build_scripts
+from distutils.command.install_data import install_data
 from distutils.core import setup
 import hashlib
 import os
@@ -47,7 +47,7 @@ def get_chromedriver_version():
                         .format(CHROMEDRIVER_INFO_URL))
 
 
-class BuildScripts(build_scripts):
+class BuildScripts(install_data):
     """Downloads and unzips the requested chromedriver executable."""
 
     def _download(self, zip_path, validate=False):
@@ -99,8 +99,8 @@ class BuildScripts(build_scripts):
     def _unzip(self, zip_path):
         zf = zipfile.ZipFile(zip_path)
         print("\t - extracting '{0}' to '{1}'."
-              .format(zip_path, self.build_dir))
-        zf.extractall(self.build_dir)
+              .format(zip_path, self.install_dir))
+        zf.extractall(self.install_dir)
 
     def _validate(self, zip_path):
         checksum = hashlib.md5(open(zip_path, 'rb').read()).hexdigest()
@@ -137,15 +137,14 @@ class BuildScripts(build_scripts):
             self._download(zip_path)
 
         self._unzip(zip_path)
-        print('А вот и разархивировался')
-        self.scripts = [os.path.join(self.build_dir, script) for script in
-                        os.listdir(self.build_dir)]
-        print(self.scripts)
-        build_scripts.run(self)
+        self.data_files = [os.path.join(self.install_dir, script) for script in
+                        os.listdir(self.install_dir)]
+        print(self.data_files)
+        install_data.run(self)
 
     def finalize_options(self):
-        build_scripts.finalize_options(self)
-        self.scripts = []
+        install_data.finalize_options(self)
+        self.data_files = []
 
 
 class Install(install):
@@ -219,5 +218,5 @@ setup(
     # If packages is empty, contents of ./build/lib will not be copied!
     packages=['chromedriver_installer'],
     scripts=['if', 'empty', 'BuildScripts', 'will', 'be', 'ignored'],
-    cmdclass=dict(build_scripts=BuildScripts, install=Install)
+    cmdclass=dict(install_data=BuildScripts, install=Install)
 )
