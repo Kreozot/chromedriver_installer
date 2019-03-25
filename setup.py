@@ -137,8 +137,10 @@ class BuildScripts(build_scripts):
             self._download(zip_path)
 
         self._unzip(zip_path)
+        print('А вот и разархивировался')
         self.scripts = [os.path.join(self.build_dir, script) for script in
                         os.listdir(self.build_dir)]
+        print(self.scripts)
         build_scripts.run(self)
 
     def finalize_options(self):
