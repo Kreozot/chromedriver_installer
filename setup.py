@@ -212,7 +212,8 @@ setup(
         'Topic :: System :: Installation/Setup',
     ],
     license='MIT',
-    package_data={'': ['*.txt', '*.rst']},
+    package_data={'': ['*.txt', '*.rst', 'chromedriver']},
+    include_package_data=True,
     # If packages is empty, contents of ./build/lib will not be copied!
     packages=['chromedriver_installer'],
     scripts=['if', 'empty', 'BuildScripts', 'will', 'be', 'ignored'],
