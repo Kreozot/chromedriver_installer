@@ -1,6 +1,5 @@
 from distutils.command.install import install
 from distutils.command.install_data import install_data
-from distutils.core import setup
 import hashlib
 import os
 import platform
@@ -8,6 +7,11 @@ import re
 import tempfile
 import sys
 import zipfile
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 try:
     from urllib import request
@@ -47,7 +51,7 @@ def get_chromedriver_version():
                         .format(CHROMEDRIVER_INFO_URL))
 
 
-class BuildScripts(install_data):
+class InstallChromeDriver(install_data):
     """Downloads and unzips the requested chromedriver executable."""
 
     def _download(self, zip_path, validate=False):
@@ -98,9 +102,12 @@ class BuildScripts(install_data):
 
     def _unzip(self, zip_path):
         zf = zipfile.ZipFile(zip_path)
-        print("\t - extracting '{0}' to '{1}'."
-              .format(zip_path, self.install_dir))
-        zf.extractall(self.install_dir)
+        out = tempfile.mkdtemp('chromedriver_distr')
+
+        print("\t - extracting '{0}' to '{1}'.".format(zip_path, out))
+        zf.extractall(out)
+
+        return (os.path.join(out, f) for f in os.listdir(out))
 
     def _validate(self, zip_path):
         checksum = hashlib.md5(open(zip_path, 'rb').read()).hexdigest()
@@ -136,10 +143,10 @@ class BuildScripts(install_data):
         else:
             self._download(zip_path)
 
-        self._unzip(zip_path)
-        self.data_files = [os.path.join(self.install_dir, script) for script in
-                        os.listdir(self.install_dir)]
-        print(self.data_files)
+        chromedriver_files = self._unzip(zip_path)
+        self.data_files = [
+            (os.path.join(self.install_dir, 'bin'), chromedriver_files)
+        ]
         install_data.run(self)
 
     def finalize_options(self):
@@ -155,6 +162,8 @@ class Install(install):
     # old setuptools version.
     _svem = list(filter(lambda x: x[0] == 'single-version-externally-managed',
                         install.user_options))
+    sub_commands = [*install.sub_commands,
+                    ('install_chrome_driver', lambda self: True)]
 
     if not _svem:
         single_version_externally_managed = None
@@ -213,9 +222,8 @@ setup(
         'Topic :: System :: Installation/Setup',
     ],
     license='MIT',
-    package_data={'': ['*.txt', '*.rst', 'chromedriver']},
-    include_package_data=True,
+    package_data={'': ['*.txt', '*.rst']},
     # If packages is empty, contents of ./build/lib will not be copied!
     packages=['chromedriver_installer'],
-    cmdclass=dict(install_data=BuildScripts, install=Install)
+    cmdclass=dict(install_chrome_driver=InstallChromeDriver, install=Install)
 )
