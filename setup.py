@@ -26,7 +26,7 @@ CHROMEDRIVER_URL_TEMPLATE = (
 
 CHROMEDRIVER_VERSION_PATTERN = re.compile(r'^\d+\.\d+\.\d+\.\d+$')
 CROMEDRIVER_LATEST_VERSION_PATTERN = re.compile(
-    r'Latest stable release: <a href="https://chromedriver.storage.googleapis.com/index.html?path=(\d+\.\d+\.\d+\.\d+)'
+    r'Latest stable release: <a href=\"https://chromedriver\.storage\.googleapis\.com/index\.html\?path=(\d+\.\d+\.\d+\.\d+)'
 )
 
 # Global variables
