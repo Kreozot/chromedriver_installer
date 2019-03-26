@@ -1,5 +1,6 @@
 from distutils.command.install import install
 from distutils.command.install_data import install_data
+from distutils.command.build_scripts import build_scripts
 import hashlib
 import os
 import platform
@@ -113,6 +114,15 @@ class InstallChromeDriver(install_data):
         checksum = hashlib.md5(open(zip_path, 'rb').read()).hexdigest()
         return checksum in chromedriver_checksums
 
+    def initialize_options(self):
+        super().initialize_options()
+        self.scripts_dir = None
+
+    def finalize_options(self):
+        self.set_undefined_options('build', ('build_scripts', 'scripts_dir'))
+        self.data_files = []
+        super().finalize_options()
+
     def run(self):
         global chromedriver_version, chromedriver_checksums
 
@@ -144,14 +154,8 @@ class InstallChromeDriver(install_data):
             self._download(zip_path)
 
         chromedriver_files = self._unzip(zip_path)
-        self.data_files = [
-            (os.path.join(self.install_dir, 'bin'), chromedriver_files)
-        ]
+        self.data_files = [(self.scripts_dir, chromedriver_files)]
         install_data.run(self)
-
-    def finalize_options(self):
-        install_data.finalize_options(self)
-        self.data_files = []
 
 
 class Install(install):
