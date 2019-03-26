@@ -17,7 +17,7 @@ except ImportError:
 
 
 CHROMEDRIVER_INFO_URL = (
-    'https://sites.google.com/a/chromium.org/chromedriver/downloads'
+    'https://sites.google.com/a/chromium.org/chromedriver/'
 )
 CHROMEDRIVER_URL_TEMPLATE = (
     'http://chromedriver.storage.googleapis.com/{version}/chromedriver_{os_}'
@@ -26,7 +26,7 @@ CHROMEDRIVER_URL_TEMPLATE = (
 
 CHROMEDRIVER_VERSION_PATTERN = re.compile(r'^\d+\.\d+\.\d+\.\d+$')
 CROMEDRIVER_LATEST_VERSION_PATTERN = re.compile(
-    r'ChromeDriver (\d+\.\d+\.\d+\.\d+)'
+    r'Latest stable release: <a href="https://chromedriver.storage.googleapis.com/index.html?path=(\d+\.\d+\.\d+\.\d+)'
 )
 
 # Global variables
