@@ -8,6 +8,7 @@ import re
 import tempfile
 import sys
 import zipfile
+import stat
 
 try:
     from urllib import request
@@ -99,11 +100,18 @@ class InstallChromeDriver(install_data):
     def _unzip(self, zip_path):
         zf = zipfile.ZipFile(zip_path)
         out = tempfile.mkdtemp('chromedriver_distr')
+        result = []
 
         print("\t - extracting '{0}' to '{1}'.".format(zip_path, out))
         zf.extractall(out)
 
-        return (os.path.join(out, f) for f in os.listdir(out))
+        # Check is executable?
+        for f in (os.path.join(out, f) for f in os.listdir(out)):
+            st = os.stat(f)
+            os.chmod(f, st.st_mode | stat.S_IEXEC)
+            result.append(f)
+
+        return result
 
     def _validate(self, zip_path):
         checksum = hashlib.md5(open(zip_path, 'rb').read()).hexdigest()
