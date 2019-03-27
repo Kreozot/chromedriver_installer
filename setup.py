@@ -1,6 +1,8 @@
 from distutils.command.install import install
 from distutils.command.install_data import install_data
 from setuptools import setup, find_packages
+import ssl
+import urllib.request
 import hashlib
 import os
 import platform
@@ -84,7 +86,13 @@ class InstallChromeDriver(install_data):
                 sys.stdout.write(' OK')
             sys.stdout.flush()
 
-        request.urlretrieve(url, zip_path, reporthoook)
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+
+        with urllib.request.urlopen(url, context=ctx) as u, \
+                open(zip_path, 'wb') as f:
+            f.write(u.read())
 
         print('')
         if not download_ok:
