@@ -74,18 +74,6 @@ class InstallChromeDriver(install_data):
         download_report_template = ("\t - downloading from '{0}' to '{1}'"
                                     .format(url, zip_path))
 
-        def reporthoook(x, y, z):
-            global download_ok
-
-            percent_downloaded = '{0:.0%}'.format((x * y) / float(z))
-            sys.stdout.write('\r')
-            sys.stdout.write("{0} [{1}]".format(download_report_template,
-                                                percent_downloaded))
-            download_ok =  percent_downloaded == '100%'
-            if download_ok:
-                sys.stdout.write(' OK')
-            sys.stdout.flush()
-
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
@@ -93,10 +81,6 @@ class InstallChromeDriver(install_data):
         with urllib.request.urlopen(url, context=ctx) as u, \
                 open(zip_path, 'wb') as f:
             f.write(u.read())
-
-        print('')
-        if not download_ok:
-            print('\t - download failed!')
 
         if validate:
             if not self._validate(zip_path):
