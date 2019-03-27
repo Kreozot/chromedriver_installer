@@ -3,7 +3,6 @@ from distutils.command.install_data import install_data
 from setuptools import setup, find_packages
 import requests
 import ssl
-import urllib.request
 import hashlib
 import os
 import platform
@@ -12,11 +11,6 @@ import tempfile
 import sys
 import zipfile
 import stat
-
-try:
-    from urllib import request
-except ImportError:
-    import urllib as request
 
 
 CHROMEDRIVER_INFO_URL = (
@@ -41,8 +35,8 @@ def get_chromedriver_version():
     """Retrieves the most recent chromedriver version."""
     global chromedriver_version
 
-    response = request.urlopen(CHROMEDRIVER_INFO_URL)
-    content = response.read()
+    response = requests.get(CHROMEDRIVER_INFO_URL, verify=False)
+    content = response.text
     match = CROMEDRIVER_LATEST_VERSION_PATTERN.search(str(content))
     if match:
         return match.group(1)
