@@ -1,6 +1,7 @@
 from distutils.command.install import install
 from distutils.command.install_data import install_data
 from setuptools import setup, find_packages
+import requests
 import ssl
 import urllib.request
 import hashlib
@@ -74,13 +75,17 @@ class InstallChromeDriver(install_data):
         download_report_template = ("\t - downloading from '{0}' to '{1}'"
                                     .format(url, zip_path))
 
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
+        # ctx = ssl.create_default_context()
+        # ctx.check_hostname = False
+        # ctx.verify_mode = ssl.CERT_NONE
 
-        with urllib.request.urlopen(url, context=ctx) as u, \
-                open(zip_path, 'wb') as f:
-            f.write(u.read())
+        # with urllib.request.urlopen(url, context=ctx) as u, \
+        #         open(zip_path, 'wb') as f:
+        #     f.write(u.read())
+
+        with open(zip_path, 'wb') as f:
+            resp = requests.get(url, verify=False)
+            f.write(resp.content)
 
         if validate:
             if not self._validate(zip_path):
