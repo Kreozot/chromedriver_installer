@@ -1,14 +1,12 @@
 from distutils.command.install import install
-from distutils.command.install_data import install_data
+from distutils.command.install_scripts import install_scripts
 from setuptools import setup, find_packages
 import requests
-import ssl
 import hashlib
 import os
 import platform
 import re
 import tempfile
-import sys
 import zipfile
 import stat
 
@@ -45,7 +43,7 @@ def get_chromedriver_version():
                         .format(CHROMEDRIVER_INFO_URL))
 
 
-class InstallChromeDriver(install_data):
+class InstallChromeDriver(install_scripts):
     """Downloads and unzips the requested chromedriver executable."""
 
     def _download(self, zip_path, validate=False):
@@ -66,17 +64,6 @@ class InstallChromeDriver(install_data):
                                                os_=os_,
                                                architecture=architecture)
 
-        download_report_template = ("\t - downloading from '{0}' to '{1}'"
-                                    .format(url, zip_path))
-
-        # ctx = ssl.create_default_context()
-        # ctx.check_hostname = False
-        # ctx.verify_mode = ssl.CERT_NONE
-
-        # with urllib.request.urlopen(url, context=ctx) as u, \
-        #         open(zip_path, 'wb') as f:
-        #     f.write(u.read())
-
         with open(zip_path, 'wb') as f:
             resp = requests.get(url, verify=False)
             f.write(resp.content)
@@ -90,14 +77,14 @@ class InstallChromeDriver(install_data):
 
     def _unzip(self, zip_path):
         zf = zipfile.ZipFile(zip_path)
-        out = tempfile.mkdtemp('chromedriver_distr')
+        self.out = tempfile.mkdtemp('chromedriver_distr')
         result = []
 
-        print("\t - extracting '{0}' to '{1}'.".format(zip_path, out))
-        zf.extractall(out)
+        print("\t - extracting '{0}' to '{1}'.".format(zip_path, self.out))
+        zf.extractall(self.out)
 
         # Check is executable?
-        for f in (os.path.join(out, f) for f in os.listdir(out)):
+        for f in (os.path.join(self.out, f) for f in os.listdir(self.out)):
             st = os.stat(f)
             os.chmod(f, st.st_mode | stat.S_IEXEC)
             result.append(f)
@@ -111,11 +98,7 @@ class InstallChromeDriver(install_data):
     def initialize_options(self):
         super().initialize_options()
         self.scripts_dir = None
-        self.data_files = []
-
-    def finalize_options(self):
-        self.set_undefined_options('install', ('install_scripts', 'scripts_dir'))
-        super().finalize_options()
+        self.skip_build = True
 
     def run(self):
         global chromedriver_version, chromedriver_checksums
@@ -147,9 +130,10 @@ class InstallChromeDriver(install_data):
         else:
             self._download(zip_path)
 
-        chromedriver_files = self._unzip(zip_path)
-        self.data_files = [(self.scripts_dir, chromedriver_files)]
-        install_data.run(self)
+        self._unzip(zip_path)
+        self.build_dir = self.out
+
+        install_scripts.run(self)
 
 
 class Install(install):
