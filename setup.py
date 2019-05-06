@@ -12,7 +12,7 @@ import stat
 
 
 CHROMEDRIVER_INFO_URL = (
-    'https://sites.google.com/a/chromium.org/chromedriver/'
+    'https://chromedriver.storage.googleapis.com/LATEST_RELEASE'
 )
 CHROMEDRIVER_URL_TEMPLATE = (
     'http://chromedriver.storage.googleapis.com/{version}/chromedriver_{os_}'
@@ -34,13 +34,7 @@ def get_chromedriver_version():
     global chromedriver_version
 
     response = requests.get(CHROMEDRIVER_INFO_URL, verify=False)
-    content = response.text
-    match = CROMEDRIVER_LATEST_VERSION_PATTERN.search(str(content))
-    if match:
-        return match.group(1)
-    else:
-        raise Exception('Unable to get latest chromedriver version from {0}'
-                        .format(CHROMEDRIVER_INFO_URL))
+    return response.text
 
 
 class InstallChromeDriver(install_scripts):
